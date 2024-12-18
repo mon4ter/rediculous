@@ -984,10 +984,7 @@ object RedisCommands {
   def hsetnx[F[_]: RedisCtx](key: String, field: String, value: String): F[Boolean] = 
     RedisCtx[F].keyed(key, NEL.of("HSETNX", key.encode, field.encode, value.encode))
 
-  private[rediculous] def mset[F[_]: RedisCtx](keyvalue: (String, String)): F[Status] =
-    RedisCtx[F].keyed(keyvalue._1, NEL("MSET", List(keyvalue._1.encode, keyvalue._2.encode)))
-
-  def mset[F[_]: RedisCtx](keyValue: (String, String), keyValues: (String, String)*): F[List[Status]] = {
+  def mset[F[_]: RedisCtx](keyValue: (String, String), keyValues: (String, String)*): F[Status] = {
     val command = NEL("MSET", (keyValue :: keyValues.toList).flatMap(t => List(t._1.encode, t._2.encode)))
     RedisCtx[F].keyed(keyValue._1, command)
   }

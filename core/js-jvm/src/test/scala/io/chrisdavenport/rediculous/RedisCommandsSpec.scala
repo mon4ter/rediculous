@@ -293,7 +293,7 @@ class RedisCommandsSpec extends CatsEffectSuite {
     import GeoSearchBy._
 
     redisConnection().flatMap{ connection =>
-    val action = for {
+      val action = for {
         _ <- geoadd[RedisIO]("bikes:rentable", List(((-122.27652, 37.805186), "station:1")))
         _ <- geoadd[RedisIO]("bikes:rentable", List(((-122.2674626, 37.8062344), "station:2")))
         _ <- geoadd[RedisIO]("bikes:rentable", List(((-122.2469854, 37.8104049), "station:3")))
@@ -317,6 +317,21 @@ class RedisCommandsSpec extends CatsEffectSuite {
           List(("station:1", 1.8523, (-122.27652043104172, 37.80518485897756)), ("station:2", 1.4979, (-122.26745992898941, 37.80623423353753)), ("station:3", 2.2441, (-122.24698394536972, 37.81040384984464))),
           List(("station:1", 1.8523, 1367952638197536L, (-122.27652043104172, 37.80518485897756)), ("station:2", 1.4979, 1367952641196278L, (-122.26745992898941, 37.80623423353753)), ("station:3", 2.2441, 1367953014079341L, (-122.24698394536972, 37.81040384984464)))
         ))
+    }
+  }
+
+  test("mset"){
+    redisConnection().flatMap{ connection =>
+      val action = for {
+        _ <- RedisCommands.mset[RedisIO](("foo", "1"), ("bar", "2"))
+        xs <- RedisCommands.mget[RedisIO]("foo", "bar", "baz")
+      } yield xs
+
+      action.run(connection).assertEquals(List(
+        "1".some,
+        "2".some,
+        None
+      ))
     }
   }
 }
